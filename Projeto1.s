@@ -1,17 +1,18 @@
 .data
  # user program data
-	msg1:		.asciiz "\nDigite a data da despesa: "
-	msg2:		.asciiz "\nDefina a categoria da despesa: "
-	msg3:		.asciiz "\nDigite o valor da despesa: "
-	msg4:		.asciiz "\n1-Registrar despesa \n2-Excluir despesa \n3-Listar despesas \n4-Exibir gasto mensal \n5-Exibir gastos por categoria \n6-Exibir ranking de despesas \n"
-	msg5:		.asciiz "\nDigite o id da despeza: "
-	msg6:		.asciiz	"\nDespezas: "
-	msg7:		.asciiz "\nGasto mensal: "
-	msg8:		.asciiz "\nCategoria: "
-	msg9:		.asciiz "\nRanking: "
-	id:		.byte 	1
-	despesaArray:	.space 1200 #armazena at√© 40 espa√ßos de 30 bytes
-	#despesaArray precisa armazenar id (1 byte), data (8 numeros, 7 bytes), categoria (16 bytes), valor (.float, 4 bytes), TOTAL = 28 bytes
+	msg1:		.asciiz 	"\nDigite a data (dd/mm/aaaa) da despesa: "
+	msg2:		.asciiz 	"\nDefina a categoria da despesa: "
+	msg3:		.asciiz 	"\nDigite o valor da despesa: "
+	msg4:		.asciiz 	"\n1-Registrar despesa \n2-Excluir despesa \n3-Listar despesas \n4-Exibir gasto mensal \n5-Exibir gastos por categoria \n6-Exibir ranking de despesas \n"
+	msg5:		.asciiz 	"\nDigite o id da despeza: "
+	msg6:		.asciiz		"\nDespezas: "
+	msg7:		.asciiz 	"\nGasto mensal: "
+	msg8:		.asciiz 	"\nCategoria: "
+	msg9:		.asciiz 	"\nRanking: "
+	id:		.byte 	0
+	despesaArray:	.space 	6144  	#armazena at√© 256 espa√ßos de 24 bytes
+	arrayPointer:	.word	0	#armazena a posiÁ„o do ultimo dado no array
+	#despesaArray precisa armazenar id (1 byte), data (6 numeros, 3 bytes), categoria (16 bytes), valor (.float, 4 bytes), TOTAL = 24 bytes
 
 .text 			
 .globl main 	#starting point: must be global
@@ -53,14 +54,34 @@ menu1:	addi	$v0,$zero,4		#printa mensagem
 	
 op1:	
 	#codigo
-	xor	$v0,$v0,$v0
-	addi $sp, $sp, -30 #30 bytes
-	lb $t0, id
-	sb $t0, 0($sp) #byte 0 recebe id (1 byte)
-	#chamada para receber a data (7 bytes)
-	addi	$v0,$zero,4
-	la	$a0,msg1
+	la	$t0, arrayPointer
+	lw	$s0, 0($t0)	#valor do arrayPointer em $s0
+	addi 	$s0, $s0, -24 	#24 bytes
+	la	$t0, id
+	lb 	$s1, 0($t0)	#valor do id em $s1
+	sb 	$s1, 0($s0) 	#byte 0 das despesas recebe id (1 byte)
+	addi	$s1, $s1,1	#valor do id = id + 1
+	sw	$s1, 0($t0)	#guarda id atualizado na variavel id
+	addi	$s0, $s0,1	#arrayPointer = arrayPointer + 1
+	
+	
+	#chamada para receber a data (3 bytes)
+	addi	$v0, $zero,4	#
+	la	$a0, msg1	#Mensagem para digitar data
+	syscall			#
+	
+	addi	$v0, $zero,5	#codigo para ler inteiros
 	syscall
+	add	$s1, $zero,$v0	#valor do dia em $s1
+	
+	addi	$v0, $zero,12
+	syscall
+	
+	addi	$v0, $zero,5	#codigo para ler inteiros
+	syscall
+	add	$s2, $zero,$v0	#valor do mes em $s2
+	
+	
 	#chamada para receber categoria (16 bytes)
 	addi	$v0,$zero,4
 	la	$a0,msg2
@@ -73,7 +94,8 @@ op1:
 	li	$v0,5 #tempor√°rio
 	syscall
 	j	menu1
-	
+
+#---------------------OperaÁ„o 1----------------------------------	
 
 op2:	addi	$v0,$zero,4
 	la	$a0,msg5
