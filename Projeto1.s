@@ -77,25 +77,45 @@ registrar:
 	syscall
 	add	$s1, $zero,$v0	#valor do dia em $s1
 	
+	sb $s1, 0($t0)
+	addi	$s0, $s0,1	#arrayPointer = arrayPointer + 1
+	
 	addi	$v0, $zero,5	#codigo para ler inteiros
 	syscall
 	add	$s2, $zero,$v0	#valor do mes em $s2
+	
+	sb $s2, 0($t0)
+	addi	$s0, $s0,1	#arrayPointer = arrayPointer + 1
 	
 	addi	$v0, $zero,5	#codigo para ler inteiros
 	syscall
 	add	$s3, $zero,$v0	#valor do ano em $s3
 	
+	sb $s3, 0($t0)
+	addi	$s0, $s0,1	#arrayPointer = arrayPointer + 1
+	
+	
+		########## TESTES ##########
 		addi $v0, $zero, 1	#print dia
 		add $a0, $s1, $zero
+		syscall
+		
+		li $a0, '/'		#print /
+		li $v0, 11
 		syscall
 	
 		addi $v0, $zero, 1	#print mes	
 		add $a0, $s2, $zero
 		syscall
+		
+		li $a0, '/'		#print /
+		li $v0, 11
+		syscall
 	
 		addi $v0, $zero, 1	#print ano
 		add $a0, $s3, $zero
 		syscall
+		###########################
 	
 	#chamada para receber categoria (16 bytes)
 	addi	$v0,$zero,4
