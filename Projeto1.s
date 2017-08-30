@@ -1,60 +1,60 @@
 .data
  # user program data
-	msg1:		.asciiz 	"\nDigite a data (dd/mm/aaaa) da despesa: "
-	msg2:		.asciiz 	"\nDefina a categoria da despesa: "
-	msg3:		.asciiz 	"\nDigite o valor da despesa: "
-	msg4:		.asciiz 	"\n1-Registrar despesa \n2-Excluir despesa \n3-Listar despesas \n4-Exibir gasto mensal \n5-Exibir gastos por categoria \n6-Exibir ranking de despesas \n"
-	msg5:		.asciiz 	"\nDigite o id da despeza: "
-	msg6:		.asciiz		"\nDespezas: "
-	msg7:		.asciiz 	"\nGasto mensal: "
-	msg8:		.asciiz 	"\nCategoria: "
-	msg9:		.asciiz 	"\nRanking: "
-	id:		.byte 	0
-	despesaArray:	.space 	6144  	#armazena at√© 256 espa√ßos de 24 bytes
-	arrayPointer:	.word	0	#armazena a posiÁ„o do ultimo dado no array
+	msg1:				.asciiz 	"\nDigite a data (dd/mm/aaaa) da despesa: "
+	msg2:				.asciiz 	"\nDefina a categoria da despesa: "
+	msg3:				.asciiz 	"\nDigite o valor da despesa: "
+	msg_cadastro:		.asciiz 	"\n1-Registrar despesa \n2-Excluir despesa \n3-Listar despesas \n4-Exibir gasto mensal \n5-Exibir gastos por categoria \n6-Exibir ranking de despesas \n7-sair /n"
+	msg5:				.asciiz 	"\nDigite o id da despeza: "
+	msg6:				.asciiz		"\nDespezas: "
+	msg7:				.asciiz 	"\nGasto mensal: "
+	msg8:				.asciiz 	"\nCategoria: "
+	msg9:				.asciiz 	"\nRanking: "
+	msg_erro:			.asciiz "Erro! O numero que foi selecionado nao e valido!\n"
+	id:					.byte 	0
+	despesaArray:		.space 	6144  	#armazena at√© 256 espa√ßos de 24 bytes
+	arrayPointer:		.word	0	#armazena a posiÁ„o do ultimo dado no array
 	#despesaArray precisa armazenar id (1 byte), data (6 numeros, 3 bytes), categoria (16 bytes), valor (.float, 4 bytes), TOTAL = 24 bytes
 
 .text 			
-.globl main 	#starting point: must be global
+.globl main
 main:
+	la $t0, despesaArray				#Inicializacao do vetor. Ela sera encontrada o programa inteiro em $t0.
+	add $s3,$0, $0						#Inicializacao de $s3 como 0. Este sera o contador de quantos cadastros foram feitos.
+	sw $s3, despesaArray($0)			#Definindo o primeiro espaco como "disponivel".	
 		
-		
-menu1:	addi	$v0,$zero,4		#printa mensagem
-	la	$a0,msg4
+menu1:	
+	addi	$v0,$zero,4		#printa mensagem
+	la	$a0,msg_cadastro
 	syscall
 	
-	li	$v0,5			#pega inteiro da opÁ„o
+	li	$v0,5				#pega inteiro da opÁ„o
 	syscall
 	add	$s0,$v0,$zero
-#=================================================================
-#------------------ComparaÁıes da opÁ„o---------------------------
-#=================================================================	
-	addi	$t0,$zero,1
-	beq	$v0,$t0,op1
-	
-	addi	$t0,$zero,2
-	beq	$v0,$t0,op2
-	
-	addi	$t0,$zero,3
-	beq	$v0,$t0,op3
-	
-	addi	$t0,$zero,4
-	beq	$v0,$t0,op4
-	
-	addi	$t0,$zero,5
-	beq	$v0,$t0,op5
-	
-	addi	$t0,$zero,6
-	beq	$v0,$t0,op6
+
+	beq	$v0, 1, registrar			#Se igual.
+	beq	$v0, 2, excluir
+	beq	$v0, 3, listar_despesas
+	beq	$v0, 4, exibir_gastos
+	beq	$v0, 5, exibir_p_categoria
+	beq	$v0, 6, ranking
+	beq	$v0, 7, sair
+
+	la $a0, msg_erro		#Caso o usuario digite um numero invalido
+	li $v0, 4
+	syscall
+	j menul
 	
 	
 #=================================================================
 #-----------------------OpÁıes------------------------------------
 #=================================================================	
 	
-op1:	
-	#codigo
-	la	$t0, arrayPointer
+registrar:	
+#1) Registrar despesa: registrar dados de uma despesa, contendo no m√≠nimo informa√ß√µes
+#como data (dia, m√™s e ano em formato num√©rico), categoria (tipo de despesa definido pelo
+#usu√°rio com at√© 15 caracteres) e valor gasto em reais. Cada despesa registrada deve possuir
+#um campo id (identificador num√©rico √∫nico), iniciado com o valor 1 e incrementado de forma
+#autom√°tica a cada nova despesa registrada. 
 	lw	$s0, 0($t0)	#valor do arrayPointer em $s0
 	addi 	$s0, $s0, -24 	#24 bytes
 	la	$t0, id
@@ -97,7 +97,9 @@ op1:
 
 #---------------------OperaÁ„o 1----------------------------------	
 
-op2:	addi	$v0,$zero,4
+excluir:
+#2) Excluir despesa: excluir dados de uma despesa identificada pelo id informado pelo usu√°rio
+	addi	$v0,$zero,4
 	la	$a0,msg5
 	syscall
 	#codigo
@@ -106,7 +108,9 @@ op2:	addi	$v0,$zero,4
 	syscall
 	j	menu1
 
-op3:	addi	$v0,$zero,4
+listar_despesas:
+#3) Listar despesas: exibir dados de todas as despesas cadastradas (ordenadas por data)
+	addi	$v0,$zero,4
 	la	$a0,msg6
 	syscall
 	#codigo
@@ -115,7 +119,10 @@ op3:	addi	$v0,$zero,4
 	syscall
 	j	menu1
 
-op4:	addi	$v0,$zero,4
+exibir_gastos:
+#4) Exibir gasto mensal: com base nos dados de todas as despesas registradas, exibir o valor
+#total dos gastos em cada m√™s
+	addi	$v0,$zero,4
 	la	$a0,msg7
 	syscall
 	#codigo
@@ -124,7 +131,10 @@ op4:	addi	$v0,$zero,4
 	syscall
 	j	menu1
 
-op5:	addi	$v0,$zero,4
+exibir_p_categoria:
+#5) Exibir gasto por categoria: com base nos dados de todas as despesas registradas, exibir o
+#valor total dos gastos por categoria, organizadas em ordem alfab√©tica
+	addi	$v0,$zero,4
 	la	$a0,msg8
 	syscall
 	#codigo
@@ -133,7 +143,10 @@ op5:	addi	$v0,$zero,4
 	syscall
 	j	menu1
 
-op6:	addi	$v0,$zero,4
+ranking:
+#6) Exibir ranking de despesas: com base nos dados de todas as despesas registradas, exibir
+#o valor total dos gastos em cada categoria, ordenados de forma decrescente pelo valor
+	addi	$v0,$zero,4
 	la	$a0,msg9
 	syscall
 	#codigo
@@ -144,4 +157,4 @@ op6:	addi	$v0,$zero,4
 	
 
 # user program code
-	
+sair:	
