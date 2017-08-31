@@ -16,6 +16,8 @@
 	msg_erro:			.asciiz "Erro! O numero que foi selecionado nao e valido!\n"
 	arrayPointer:		.word	0	#armazena a posição do ultimo dado no array
 	id:					.byte 	0
+	
+        buffer: .space 20
 	#despesaArray precisa armazenar id (1 byte), data (6 numeros, 3 bytes), categoria (16 bytes), valor (.float, 4 bytes), TOTAL = 24 bytes
 
 .text 			
@@ -123,14 +125,21 @@ registrar:
 	syscall
 	
 	addi	$v0, $zero, 8	#codigo para ler string
-	la	$a0, 16
-	add	$t0, $zero, $v0	#categoria em $t0
+	la	$a0, buffer
+	li 	$a1, 16
+	add	$t0, $zero, $a0	#categoria em $t0
 	syscall
+
+        #la $a0, buffer #reload byte space to primary address
+        #move $a0,$t0 # primary address = t0 address (load pointer)
+        #li $v0,4 # print string
+        #syscall
 	
 		
 		######## TESTE ########
-         	move $a0,$t0 # primary address = t0 address (load pointer)
-         	li $v0,4 # print string
+		la $a0, buffer
+         	add $a0, $zero, $t0
+         	li $v0, 4 	#print string
          	syscall
 	
 	#chamada para receber valor (float)
