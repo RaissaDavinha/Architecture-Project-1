@@ -77,21 +77,21 @@ registrar:
 	syscall
 	add	$s1, $zero,$v0	#valor do dia em $s1
 	
-	sb $s1, 0($t0)
+	sb $s1, 0($t0)		#salva dia
 	addi	$s0, $s0,1	#arrayPointer = arrayPointer + 1
 	
 	addi	$v0, $zero,5	#codigo para ler inteiros
 	syscall
 	add	$s2, $zero,$v0	#valor do mes em $s2
 	
-	sb $s2, 0($t0)
+	sb $s2, 0($t0)		#salva mes
 	addi	$s0, $s0,1	#arrayPointer = arrayPointer + 1
 	
 	addi	$v0, $zero,5	#codigo para ler inteiros
 	syscall
 	add	$s3, $zero,$v0	#valor do ano em $s3
 	
-	sb $s3, 0($t0)
+	sb $s3, 0($t0)		#salva ano
 	addi	$s0, $s0,1	#arrayPointer = arrayPointer + 1
 	
 	
@@ -121,6 +121,18 @@ registrar:
 	addi	$v0,$zero,4
 	la	$a0,msg2
 	syscall
+	
+	addi	$v0, $zero, 8	#codigo para ler string
+	la	$a0, 16
+	add	$t0, $zero, $v0	#categoria em $t0
+	syscall
+	
+		
+		######## TESTE ########
+         	move $a0,$t0 # primary address = t0 address (load pointer)
+         	li $v0,4 # print string
+         	syscall
+	
 	#chamada para receber valor (float)
 	addi	$v0,$zero,4
 	la	$a0,msg3
