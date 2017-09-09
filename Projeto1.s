@@ -170,37 +170,77 @@ excluir:
 
 listar_despesas:
 #3) Listar despesas: exibir dados de todas as despesas cadastradas (ordenadas por data)
-#array em t6
-#contador em s3
 	addi	$v0, $zero ,4
 	la	$a0, msg_despeza
 	syscall
 	
-	add $t6, $t0, $zero
-	add $s3, $s0, $zero
-	jal bubbleSort
+#------------------------------------printar ID-------------------------------------------------
+	la $t7, despesaArray				#falta somar posiçao no array * 28
 	
-	add $t1, $0, $zero
-	add $t2, $0, $zero
-	add $t8, $s0, $zero
-	add $t9, $zero, $zero
-
-procura_p:						#Procura no vetor algum espaco disponivel.
-	add $t1, $t1, $4
-	lw $a0, 0($t1)					#ve se é igual a s3
-	beq $t9, $t8, esc
-	
-#printar
-	la $a0, msg_data				#printa msg de dia
-	li $v0, 4
+	la $a0, msg_id					#printa msg de id
+	addi $v0, $zero, 4
+	syscall
+#------------------------------------printar DATA-------------------------------------------------	
+	addi $t8, $t7, $zero				#ano
+	lb $t8, 0($t8)
+	add $a0, $t8, $zero
+	addi $v0, $zero, 1				#Print int (ID)
 	syscall
 
-	
-	addi $v0, $0, 1					#Print int (Data)
+	la $a0, msg_data				#printa msg de data
+	addi $v0, $zero, 4
+	syscall
+
+	addi $t8, $t7, 5				#ano
+	lb $t8, 0($t8)
+	add $a0, $t8, $zero
+	addi $v0, $zero, 1				#Print int (Data)
 	syscall
 	
+	addi	$v0, $zero ,4
+	la	$a0, msg_barra
+	syscall
+
+	addi $t8, $t7, 6				#mes
+	lb $t8, 0($t8)
+	add $a0, $t8, $zero
+	addi $v0, $zero, 1
+	syscall
 	
-esc:
+	addi	$v0, $zero ,4
+	la	$a0, msg_barra
+	syscall
+
+	addi $t8, $t7, 7				#dia
+	lb $t8, 0($t8)
+	add $a0, $t8, $zero
+	addi $v0, $zero, 1
+	syscall
+	
+	addi	$v0, $zero ,4
+	la	$a0, msg_enne
+	syscall
+#------------------------------------printar categoria-------------------------------------------------
+	addi	$v0, $zero ,4
+	la	$a0, msg_categoria
+	syscall
+	
+	addi $t8, $t7, 8
+	lb $t8, 0($t8)
+	add $a0, $t8, $zero
+	addi $v0, $zero, 4
+	syscall
+#------------------------------------printar valor-------------------------------------------------
+	addi	$v0, $zero ,4
+	la	$a0, msg_valor
+	syscall
+	
+	addi $t8, $t7, 24	
+	lb $t8, 0($t8)
+	add $f12, $t8, $zero
+	addi $v0, $zero, 2
+	syscall
+	
 	j	menu1
 
 exibir_gastos:
@@ -239,113 +279,6 @@ ranking:
 	syscall
 	j	menu1
 	
-
-
-
-bubbleSort:   
-#array em t6
-#contador em s3
-	#t0, t1, t2, t6, t7, s1, s2
-   	addi $sp, $sp, -40
-   	sw $t0, 0($sp)						#Salvando os dados
-	sw $t1, 4($sp)
-	sw $t2, 8($sp)
-	sw $t6, 12($sp)
-	sw $t7, 16($sp)
-	sw $s1, 20($sp)
-	sw $s2, 24($sp)
-	sw $t4, 28($sp)
-	sw $t8, 32($sp)
-	sw $t9, 36($sp)
-	
-#  Inicializar i como 0    
-	add $t0,$zero,$zero #i
-
-     
-#  Loop I   
-    bubbleLoop:
-	la $t6, struct
-       #Se finalizado
-        beq $t0,$s3,done
-         
-        #  loop ( 10 - i - 1 ) 
-        sub $t7,$s3,$t0
-        addi $t7,$t7,-1
-         
-        # Inicializacao J
-        add $t1,$zero,$zero
-         
-        # Loop do J 
-        jLoop:       
-            beq $t1,$t7,continue
-            
-            lw  $s1,0($t6)
-            lw  $s2,32($t6)
-
-            sgt $t2, $s1,$s2
-
-            beq $t2, $zero, good
-            sw  $s2,0($t6)
-            sw  $s1,32($t6)
-            
-            #before loopinho
-            sll $t8, $t1,  5 #multiplica t1 (J) por 32
-    	    addi $t8, $t8, 4
-    	    addi $t9, $t8, 32
-    	    addi $t4, $0, 0
-    loopinho:
-            lb  $s1, struct($t8)
-            lb  $s2, struct($t9)
-            sb  $s2, struct($t8)
-            sb  $s1, struct($t9)
-            
-            addi $t4, $t4, 1
-            addi $t8, $t8, 1
-            addi $t9, $t9, 1
-            bne  $t4, 15, loopinho
-
-            #fim loopinho
-            
-            lw	$s1, 20($t6)
-	    lw	$s2, 52($t6)
-	    sw	$s2, 20($t6)
-	    sw	$s1, 52($t6)
-	
-	    lw	$s1, 24($t6)
-	    lw	$s2, 56($t6)
-	    sw	$s2, 24($t6)
-	    sw	$s1, 56($t6)
-	
-	    lw	$s1, 28($t6)
-	    lw	$s2, 60($t6)
-	    sw	$s2, 28($t6)
-	    sw	$s1, 60($t6)
-
-        good:
-            addi $t1,$t1,1
-            addi $t6, $t6, 32
-            j jLoop
-
-        continue:
-	
-	#Incrementa e da o jump
-        addi $t0,$t0,1
-        j bubbleLoop
-
-done:
-	lw $t0, 0($sp)						#Salvando os dados
-	lw $t1, 4($sp)
-	lw $t2, 8($sp)
-	lw $t6, 12($sp)
-	lw $t7, 16($sp)
-	lw $s1, 20($sp)
-	lw $s2, 24($sp)
-	lw $t4, 28($sp)
-	lw $t8, 32($sp)
-	lw $t9, 36($sp)
-	addi $sp, $sp, 28
-
-	jr $ra	
 #---------------------------------------------------------------------------------------------------#
 sair:
 	li $v0, 10						#Codigo para encerrar o programa
