@@ -11,15 +11,18 @@
 	msg_reg4:	.asciiz 	"\nDefina a categoria da despesa: "
 	msg_reg5:	.asciiz 	"\nDigite o valor da despesa: "
 	msg_reg6:	.asciiz		"\nDespesa registrada com sucesso!\nAperte qualquer tecla para voltar ao menu.\n"
+	msg_reg7:	.asciiz		"\nAperte qualquer tecla para voltar ao menu.\n"
 	msg_menu1:	.asciiz 	"\n1-Registrar despesa \n2-Excluir despesa \n3-Listar despesas \n4-Exibir gasto mensal \n5-Exibir gastos por categoria \n6-Exibir ranking de despesas \n7-sair \n"
 	msg_menu2:	.asciiz 	"\nErro! O numero que foi selecionado nao e valido!\n"
 	msg_despeza:	.asciiz		"\nDespezas: "
 	msg_gasto:	.asciiz 	"\nGasto mensal: "
-	msg_categoria:	.asciiz 	"\nCategoria: "
+	msg_categoria:	.asciiz 	" | Categoria: "
 	msg_ranking:	.asciiz 	"\nRanking: "
-	msg_data:	.asciiz		"\nData:"
+	msg_data:	.asciiz		" | Data:"
 	msg_id:		.asciiz		"\nId:"
-	id:		.byte 		1
+	msg_valor:	.asciiz		" | Valor: "
+	barra:		.asciiz 	"/"
+	id:		.word		1
 	#inicioArray precisa armazenar id  (1 byte), data  (6 numeros, 3 bytes), categoria  (16 bytes), valor  (.float, 4 bytes), TOTAL = 24 bytes
 
 .text 			
@@ -151,26 +154,65 @@ excluir:
 
 listar_despesas:
 #3) Listar despesas: exibir dados de todas as despesas cadastradas  (ordenadas por data)
-
+	la	$a0, msg_despeza
+	addi	$v0, $zero, 4
+	syscall
+loop:
+	#----------------------------------#
+	la	$a0, msg_id
+	addi	$v0, $zero, 4
+	syscall
+	
 	lw	$a0, 0 ($s1)
 	addi	$v0, $zero, 1
 	syscall
-	
-	lh	$a0, 4 ($s1)
-	syscall
-
-	lb	$a0, 6 ($s1)
+	#----------------------------------#
+	la	$a0, msg_data
+	addi	$v0, $zero, 4
 	syscall
 	
 	lb	$a0, 7 ($s1)
+	addi	$v0, $zero, 1
 	syscall
 
-	addi	$a0, $s1, 8
+	la	$a0, barra
+	addi	$v0, $zero, 4
+	syscall
+
+	lb	$a0, 6 ($s1)
+	addi	$v0, $zero, 1
+	syscall
+	
+	la	$a0, barra
+	addi	$v0, $zero, 4
+	syscall
+	
+	lh	$a0, 4 ($s1)
+	addi	$v0, $zero, 1
+	syscall
+	#----------------------------------#
+	la	$a0, msg_valor
 	addi	$v0, $zero, 4
 	syscall
 	
 	l.s	$f12, 24 ($s1)
 	addi	$v0, $zero, 2
+	syscall
+	#----------------------------------#
+	la	$a0, msg_categoria
+	addi	$v0, $zero, 4
+	syscall
+
+	addi	$a0, $s1, 8
+	addi	$v0, $zero, 4
+	syscall
+	#----------------------------------#
+sair:
+	la	$a0, msg_reg7	#mensagem de termino
+	addi	$v0, $zero, 4
+	syscall
+	
+	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
 	syscall
 
 	j	menu1
