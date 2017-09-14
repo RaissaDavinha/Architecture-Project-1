@@ -23,22 +23,24 @@
 	msg_valor:	.asciiz		" | Valor: "
 	barra:		.asciiz 	"/"
 	id:		.word		1
-	#inicioArray precisa armazenar id  (1 byte), data  (6 numeros, 3 bytes), categoria  (16 bytes), valor  (.float, 4 bytes), TOTAL = 24 bytes
+	#inicioArray precisa armazenar id  (4 bytes), data  (6 numeros, 4 bytes), categoria  (16 bytes), valor  (.float, 4 bytes), TOTAL = 28 bytes
 
 .text 			
 .globl main
-main:
-	la 	$s0, inicioArray	#Inicializacao do vetor. Ela sera encontrada o programa inteiro em $t0.
-	la 	$s1, arrayPointer	#endereco do arrayPointer em $s1
-	sw	$s0, 0  ($s1)		#arraypointer = inicioArray pois nao ha nenhuma despesa ainda.
-	add	$s1, $s0, $zero		#arrayPointer em $s1 e inicioArray em $s0		
+main:	
+	#$s0 = endereço array pointer
+	#$s1 = condteudo array pointer
+	la 	$s1, inicioArray	#Inicializacao do vetor. Ela sera encontrada o programa inteiro em $t0.
+	la 	$s0, arrayPointer	#endereco do arrayPointer em $s1
+	sw	$s1, 0  ($s0)		#arraypointer = inicioArray pois nao ha nenhuma despesa ainda.
+	#add	$s1, $s0, $zero		#arrayPointer em $s1 e inicioArray em $s0		
 		
 menu1:	
 	addi	$v0, $zero, 4		#printa mensagem
 	la	$a0, msg_menu1
 	syscall
 	
-	addi	$v0, $zero, 5			#pega inteiro da opÃ¨Â¤Â¯
+	addi	$v0, $zero, 5		#pega inteiro da opÃƒÂ¨Ã‚Â¤Ã‚Â¯
 	syscall
 
 	beq	$v0, 1, registrar	#Se igual.
@@ -67,9 +69,6 @@ registrar:
 #automatica a cada nova despesa registrada.
 
 #----------------------------Inicio-------------------------------
-
-	addi	$s1, $s1, -28	#array pointer abre espaco para 28 bytes  (1 despesa)
-
 
 	la	$t0, id		#endereco do id -> $t0
 	lw	$t1, 0 ($t0)	#conteudo do id -> $t1
@@ -135,6 +134,9 @@ registrar:
 	addi	$v0, $zero, 4
 	syscall
 	
+	addi	$s1, $s1, -28	#array pointer abre espaco para 28 bytes  (1 despesa)
+	sw $s1, 0($s0)		#salva endereço da ultima posiçao no array pointer
+	
 	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
 	syscall
 
@@ -157,13 +159,21 @@ listar_despesas:
 	la	$a0, msg_despeza
 	addi	$v0, $zero, 4
 	syscall
+	
+	#1-pegar endereço inicial
+	#2-usar endereço para pegar dados
+	#3-atualizar valor
+	#4-se valor nao for igual ao arraypointer, repetir
+	
+	la $s2, inicioArray
+	addi $s3, $s1, -28
 loop:
 	#----------------------------------#
 	la	$a0, msg_id
 	addi	$v0, $zero, 4
 	syscall
 	
-	lw	$a0, 0 ($s1)
+	lw	$a0, 0 ($s2)
 	addi	$v0, $zero, 1
 	syscall
 	#----------------------------------#
@@ -171,7 +181,7 @@ loop:
 	addi	$v0, $zero, 4
 	syscall
 	
-	lb	$a0, 7 ($s1)
+	lb	$a0, 7 ($s2)
 	addi	$v0, $zero, 1
 	syscall
 
@@ -179,7 +189,7 @@ loop:
 	addi	$v0, $zero, 4
 	syscall
 
-	lb	$a0, 6 ($s1)
+	lb	$a0, 6 ($s2)
 	addi	$v0, $zero, 1
 	syscall
 	
@@ -187,7 +197,7 @@ loop:
 	addi	$v0, $zero, 4
 	syscall
 	
-	lh	$a0, 4 ($s1)
+	lh	$a0, 4 ($s2)
 	addi	$v0, $zero, 1
 	syscall
 	#----------------------------------#
@@ -195,7 +205,7 @@ loop:
 	addi	$v0, $zero, 4
 	syscall
 	
-	l.s	$f12, 24 ($s1)
+	l.s	$f12, 24 ($s2)
 	addi	$v0, $zero, 2
 	syscall
 	#----------------------------------#
@@ -203,10 +213,13 @@ loop:
 	addi	$v0, $zero, 4
 	syscall
 
-	addi	$a0, $s1, 8
+	addi	$a0, $s2, 8
 	addi	$v0, $zero, 4
 	syscall
 	#----------------------------------#
+	addi $s2, $s2, -28
+	bne $s2, $s1, loop
+	
 sair:
 	la	$a0, msg_reg7	#mensagem de termino
 	addi	$v0, $zero, 4
@@ -234,7 +247,7 @@ exibir_gastos:
 
 exibir_p_categoria:
 #5) Exibir gasto por categoria: com base nos dados de todas as despesas registradas, exibir o
-#valor total dos gastos por categoria, organizadas em ordem alfabÃƒÂ©tica
+#valor total dos gastos por categoria, organizadas em ordem alfabÃƒÆ’Ã‚Â©tica
 
 #=================================================================
 #-----------------------Operacao 6--------------------------------
@@ -246,6 +259,6 @@ ranking:
 #o valor total dos gastos em cada categoria, ordenados de forma decrescente pelo valor
 
 #---------------------------------------------------------------------------------------------------#
-sair:
+sairPrograma:
 	li $v0, 10						#Codigo para encerrar o programa
 	syscall
