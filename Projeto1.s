@@ -332,14 +332,96 @@ exibir_p_categoria:
 #=================================================================
 #-----------------------Operacao 6--------------------------------
 #=================================================================
-
-	
-
-
 ranking:
 #6) Exibir ranking de despesas: com base nos dados de todas as despesas registradas, exibir
 #o valor total dos gastos em cada categoria, ordenados de forma decrescente pelo valor
+	la	$a0, msg_ranking
+	addi	$v0, $zero, 4
+	syscall
+	
+	#0-contador para quantidade de categorias
+	#1- pega primeira categoria e manda pro dynamicArray (posiçao 8)
+	#2-pega proxima categoria e compara
+	#3-se igual, apenas soma despezas, se diferente, manda pro dynamicArray e soma um no contador
+	#4-vai para proxima categoria
 
+	la $s4, dynamicArray
+	la $s5, inicioArray
+	
+	lw $s6, 8($s5)	#primeira categoria
+	sw $s6, 0($s4)
+	lw $s6, 12($s5)
+	sw $s6, 4($s4)
+	lw $s6, 16($s5)
+	sw $s6, 8($s4)
+	lw $s6, 20($s5)
+	sw $s6, 12($s4)
+	
+	l.s $f12, 24 ($s5)
+	s.s $f12, 16($s4)
+	
+	addi $t0, $zero, 1 #contador inicia com 1
+	addi $t2, $s5, 28
+	
+r0:
+	add $t3, $zero, $zero	# i = 0
+	
+r1:	#loop com o contador pra procurar categoria igual
+	addi $t1, $zero, 20
+	mul $t1, $t3, $t1	#multiplicar contador por 20, somar com endereço base do dynamicArray
+	add $t1, $t1, $s4
+	
+	lw $s3, 0($t1)		#compara primeiros 4 bytes, se der igual, continuar, diferente já sai do loop
+	lw $s4, 8($t2)	
+	bne $s3, $s4, r2
+	
+	lw $s3, 4($t1)		
+	lw $s4, 12($t2)	
+	bne $s3, $s4, r2
+	
+	lw $s3, 8($t1)		
+	lw $s4, 16($t2)	
+	bne $s3, $s4, r2
+	
+	lw $s3, 12($t1)		
+	lw $s4, 20($t2)	
+	bne $s3, $s4, r2
+	
+	l.s $f12, 16($t1)	#pega valor já salvo, soma com novo valor e guarda
+	l.s $f1, 24($t2)
+	add.s $f1, $f1, $f12
+	s.s $f12, 16($t1)
+	j r3			#nao precisa comparar com o resto do array
+	
+r2:	
+	addi $t3, $t3, 1	#adicionar um ao i e 28 ao endereço do incioArray
+	slt $t4, $t3, $t0
+	bne  $t4, $zero, r1	#se i < = ao contador, volta loop
+	beq $t4, $t3, r1
+	
+				#se nao for igual a nenhum, colocamos um novo no array
+	addi $t0, $t0, 1	#soma 1 ao contador
+	addi $t1, $t1, 20	#proximo espaço vazio do array
+	lw $s6, 8($t2)		
+	sw $s6, 0($t1)
+	lw $s6, 12($t2)
+	sw $s6, 4($t1)
+	lw $s6, 16($t2)
+	sw $s6, 8($t1)
+	lw $s6, 20($t2)
+	sw $s6, 12($t1)
+	
+	l.s $f12, 24 ($t2)
+	s.s $f12, 16($t1)
+
+r3:
+	addi $t2, $t2, 28
+	bne $s1, $t2, r0
+	
+	#novo loop para printar resultado (contador em $t0)
+	
+	
+	j menu1 #debug
 #---------------------------------------------------------------------------------------------------#
 sairPrograma:
 	li $v0, 10						#Codigo para encerrar o programa
