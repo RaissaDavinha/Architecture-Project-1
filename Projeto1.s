@@ -1,16 +1,9 @@
-#--------OBSERVACOES E ATUALIZACOES------------------------------
-#	BRUNO ITENS 2 E 4
-#	RAFAEL ITENS 1 E 5
-#	RAISSA ITENS 3 E 6
-#
-#	Mudar item 1 para receber e ordenar por data
-#	Itens que cada um vai fazer foimodificado
-#	Registradores com endereço do ArrayPointer e do valor do ArayPointer foram modificados
-#
-#----------------------------------------------------------------
+#BRUNO ITENS 1 E 4
+#RAFAEL ITENS 2 E 5
+#RAISSA ITENS 3 E 6
 .data
  # user program data
- 	dynamicArray:	.space		5600	#armazenamento dinamico para sorts
+ 	dynamicArray:	.space 		5600  	#string (16bytes), valor(4bytes) = 20 bytes
 	inicioArray:	.space 		5600  	#armazena 200 espacos de 28 bytes
 	arrayPointer:	.word		0	#armazena a posicao do ultimo dado no array
 	msg_reg1:	.asciiz 	"\nDigite a dia da despesa: "
@@ -30,24 +23,25 @@
 	msg_id:		.asciiz		"\nId:"
 	msg_valor:	.asciiz		" | Valor: "
 	barra:		.asciiz 	"/"
-	id:		.word		0
+	id:		.word		1
 	#inicioArray precisa armazenar id  (4 bytes), data  (6 numeros, 4 bytes), categoria  (16 bytes), valor  (.float, 4 bytes), TOTAL = 28 bytes
 
 .text 			
 .globl main
 main:	
-	#$s0 = endereÃ§o array pointer
+	#$s0 = endereço array pointer
 	#$s1 = condteudo array pointer
 	la 	$s1, inicioArray	#Inicializacao do vetor. Ela sera encontrada o programa inteiro em $t0.
 	la 	$s0, arrayPointer	#endereco do arrayPointer em $s1
 	sw	$s1, 0  ($s0)		#arraypointer = inicioArray pois nao ha nenhuma despesa ainda.
+	#add	$s1, $s0, $zero		#arrayPointer em $s1 e inicioArray em $s0		
 		
 menu1:	
 	addi	$v0, $zero, 4		#printa mensagem
 	la	$a0, msg_menu1
 	syscall
 	
-	addi	$v0, $zero, 5		#pega inteiro da opÃƒÆ’Ã‚Â¨Ãƒâ€šÃ‚Â¤Ãƒâ€šÃ‚Â¯
+	addi	$v0, $zero, 5		#pega inteiro da opÃƒÂ¨Ã‚Â¤Ã‚Â¯
 	syscall
 
 	beq	$v0, 1, registrar	#Se igual.
@@ -75,13 +69,11 @@ registrar:
 #um campo id  (identificador numerico unico), iniciado com o valor 1 e incrementado de forma
 #automatica a cada nova despesa registrada.
 
-	la	$s0, arrayPointer
-	lw	$s1, 0 ($s0)
-
 #----------------------------Inicio-------------------------------
 
 	la	$t0, id		#endereco do id -> $t0
 	lw	$t1, 0 ($t0)	#conteudo do id -> $t1
+	sw	$t1, 0 ($s1)	#guarda id da despesa nos primeiros 4 bytes
 	addi	$t1, $t1, 1	#incrementa id para proxima despesa
 	sw	$t1, 0 ($t0)	#guarda id atualizado
 
@@ -93,17 +85,17 @@ registrar:
 	
 	addi	$v0, $zero, 5
 	syscall
-	add	$t2, $v0, $zero
+	sb	$v0, 7 ($s1)	#guardar dia no array
 	
 #----------------------------Mes----------------------------------	
 	
-	la	$a0, msg_reg2	#mensagem de pegar mes
+	la	$a0, msg_reg2	#mesagem de pegar mes
 	addi	$v0, $zero 4
 	syscall
 	
 	addi	$v0, $zero, 5
 	syscall
-	add	$t3, $v0, $zero
+	sb	$v0, 6, ($s1)	#guardar mes no array
 	
 #----------------------------Ano----------------------------------	
 	
@@ -113,74 +105,15 @@ registrar:
 	
 	addi	$v0, $zero, 5
 	syscall
+	sh	$v0, 4, ($s1)	#guardar dia no array
 	
-	sll	$s2, $v0, 8
-	addu	$s2, $s2, $t3
-	sll	$s2, $s2, 8
-	addu	$s2, $s2, $t2	#data total em $s2
-
-#------------------Procura local para inserir---------------------
-
-	la	$t0, inicioArray
-
-reg_loop1:	
-	
-	beq	$t0, $s1, fim_insrt
-	
-
-		
-	lw	$t2, -24 ($t0)
-	slt	$t3, $s2, $t2
-	
-	bne	$t3, $zero, shft_up	
-	addi	$t0, $t0, -28
-	j	reg_loop1
-
-shft_up:
-	addi	$t2, $t0, -28
-	add	$s4, $s1, $zero
-	
-reg_loop2:
-
-	lw	$s3, 0 ($s4)
-	sw	$s3, -28 ($s4)
-	
-	lw	$s3, 4 ($s4)
-	sw	$s3, -24 ($s4)
-	
-	lw	$s3, 8 ($s4)
-	sw	$s3, -20 ($s4)
-	
-	lw	$s3, 12 ($s4)
-	sw	$s3, -16 ($s4)
-	
-	lw	$s3, 16 ($s4)
-	sw	$s3, -12 ($s4)
-	
-	lw	$s3, 20 ($s4)
-	sw	$s3, -8 ($s4)
-	
-	lw	$s3, 24 ($s4)
-	sw	$s3, -4 ($s4)
-	
-	beq	$s4, $t2, fim_insrt
-	addi	$s4, $s4, 28
-	j	reg_loop2
-	
-	
-fim_insrt:
-	addi	$t0, $t0, -28
-
-	sw	$t1, 0 ($t0)
-	sw	$s2, 4 ($t0)
-						
 #---------------------------Categoria-----------------------------	
 	
 	la	$a0, msg_reg4	#mesagem de pegar categoria
 	addi	$v0, $zero, 4
 	syscall
 	
-	addi	$a0, $t0, 8	#endereco do local aonde a string sera gravada
+	addi	$a0, $s1, 8	#endereco do local aonde a string sera gravada
 	addi	$a1, $zero, 16	#numero maximo de caracteres para ler
 	addi	$v0, $zero, 8	#codigo da interrupcao
 	syscall			#ler string
@@ -194,7 +127,7 @@ fim_insrt:
 	addi	$v0, $zero, 6	#codigo de ler float
 	syscall
 
-	s.s	$f0, 24 ($t0)	#guarda valor no array
+	s.s	$f0, 24, ($s1)	#guarda valor no array
 
 #---------------------------Fim------------------------------------	
 
@@ -203,11 +136,10 @@ fim_insrt:
 	syscall
 	
 	addi	$s1, $s1, -28	#array pointer abre espaco para 28 bytes  (1 despesa)
-	sw 	$s1, 0 ($s0)		#salva endereco da ultima posisao no array pointer
+	sw $s1, 0($s0)		#salva endereço da ultima posiçao no array pointer
 	
 	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
 	syscall
-
 
 	j	menu1
 
@@ -220,34 +152,23 @@ excluir:
 
 #=================================================================
 #-----------------------Operacao 3--------------------------------
-#=================================================================
-
-		
+#=================================================================	
 
 
 listar_despesas:
 #3) Listar despesas: exibir dados de todas as despesas cadastradas  (ordenadas por data)
-	
-	la	$s0, arrayPointer
-	lw	$s1, 0 ($s0)
-	
 	la	$a0, msg_despeza
 	addi	$v0, $zero, 4
 	syscall
-
-	la 	$s2, inicioArray
-		
-	beq 	$s2, $s1, sair
 	
-	#1-pegar endereÃ§o inicial
-	#2-usar endereÃ§o para pegar dados
+	#1-pegar endereço inicial
+	#2-usar endereço para pegar dados
 	#3-atualizar valor
 	#4-se valor nao for igual ao arraypointer, repetir
 	
-	
+	la $s2, inicioArray
+	addi $s3, $s1, -28
 loop:
-	addi 	$s2, $s2, -28
-		
 	#----------------------------------#
 	la	$a0, msg_id
 	addi	$v0, $zero, 4
@@ -261,7 +182,7 @@ loop:
 	addi	$v0, $zero, 4
 	syscall
 	
-	lbu	$a0, 4 ($s2)
+	lb	$a0, 7 ($s2)
 	addi	$v0, $zero, 1
 	syscall
 
@@ -269,7 +190,7 @@ loop:
 	addi	$v0, $zero, 4
 	syscall
 
-	lbu	$a0, 5 ($s2)
+	lb	$a0, 6 ($s2)
 	addi	$v0, $zero, 1
 	syscall
 	
@@ -277,7 +198,7 @@ loop:
 	addi	$v0, $zero, 4
 	syscall
 	
-	lhu	$a0, 6 ($s2)
+	lh	$a0, 4 ($s2)
 	addi	$v0, $zero, 1
 	syscall
 	#----------------------------------#
@@ -297,8 +218,8 @@ loop:
 	addi	$v0, $zero, 4
 	syscall
 	#----------------------------------#
-
-	bne	$s2, $s1, loop
+	addi $s2, $s2, -28
+	bne $s2, $s1, loop
 	
 sair:
 	la	$a0, msg_reg7	#mensagem de termino
@@ -327,11 +248,11 @@ exibir_gastos:
 
 exibir_p_categoria:
 #5) Exibir gasto por categoria: com base nos dados de todas as despesas registradas, exibir o
-#valor total dos gastos por categoria, organizadas em ordem alfabÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©tica
+#valor total dos gastos por categoria, organizadas em ordem alfabÃƒÆ’Ã‚Â©tica
 
 #=================================================================
 #-----------------------Operacao 6--------------------------------
-#=================================================================
+#=================================================================	
 ranking:
 #6) Exibir ranking de despesas: com base nos dados de todas as despesas registradas, exibir
 #o valor total dos gastos em cada categoria, ordenados de forma decrescente pelo valor
@@ -345,84 +266,121 @@ ranking:
 	#3-se igual, apenas soma despezas, se diferente, manda pro dynamicArray e soma um no contador
 	#4-vai para proxima categoria
 
-	la $s4, dynamicArray
-	la $s5, inicioArray
+	la 	$s4, dynamicArray
+	la 	$s5, inicioArray
+	add	$s3, $s4,$zero	
 	
-	lw $s6, 8($s5)	#primeira categoria
-	sw $s6, 0($s4)
-	lw $s6, 12($s5)
-	sw $s6, 4($s4)
-	lw $s6, 16($s5)
-	sw $s6, 8($s4)
-	lw $s6, 20($s5)
-	sw $s6, 12($s4)
+	beq	$s5, $s1, rnk_fim
 	
-	l.s $f12, 24 ($s5)
-	s.s $f12, 16($s4)
+	addi	$s5, $s5, -28
+	addi	$s3, $s3, -20
 	
-	addi $t0, $zero, 1 #contador inicia com 1
-	addi $t2, $s5, 28
+	lw 	$s6, 8($s5)	#primeira categoria
+	sw 	$s6, 0($s3)
+	lw 	$s6, 12($s5)
+	sw 	$s6, 4($s3)
+	lw 	$s6, 16($s5)
+	sw 	$s6, 8($s3)
+	lw 	$s6, 20($s5)
+	sw 	$s6, 12($s3)
 	
-r0:
-	add $t3, $zero, $zero	# i = 0
+	l.s 	$f12, 24 ($s5)
+	s.s 	$f12, 16($s3)
 	
-r1:	#loop com o contador pra procurar categoria igual
-	addi $t1, $zero, 20
-	mul $t1, $t3, $t1	#multiplicar contador por 20, somar com endereço base do dynamicArray
-	add $t1, $t1, $s4
 	
-	lw $s3, 0($t1)		#compara primeiros 4 bytes, se der igual, continuar, diferente já sai do loop
-	lw $s4, 8($t2)	
-	bne $s3, $s4, r2
 	
-	lw $s3, 4($t1)		
-	lw $s4, 12($t2)	
-	bne $s3, $s4, r2
+rnk_loop1:
 	
-	lw $s3, 8($t1)		
-	lw $s4, 16($t2)	
-	bne $s3, $s4, r2
+	beq	$s5, $s1, rnk_loop2
+	addi 	$s5, $s5, -28
 	
-	lw $s3, 12($t1)		
-	lw $s4, 20($t2)	
-	bne $s3, $s4, r2
+	lw	$t0, 8 ($s5)
+	lw	$t1, 0 ($s4)
+	bne	$t1, $t0, rnk_diferente
 	
-	l.s $f12, 16($t1)	#pega valor já salvo, soma com novo valor e guarda
-	l.s $f1, 24($t2)
-	add.s $f1, $f1, $f12
-	s.s $f12, 16($t1)
-	j r3			#nao precisa comparar com o resto do array
+	lw	$t0, 12 ($s5)
+	lw	$t1, 4 ($s4)
+	bne	$t1, $t0, rnk_diferente
+	
+	lw	$t0, 16 ($s5)
+	lw	$t1, 8 ($s4)
+	bne	$t1, $t0, rnk_diferente
+	
+	lw	$t0, 20 ($s5)
+	lw	$t1, 12 ($s4)
+	bne	$t1, $t0, rnk_diferente
+	
+	j	rnk_igual
+	
+rnk_diferente:
+
+	addi	$s3, $s3, -20		
+	
+	lw 	$s6, 8($s5)	#primeira categoria
+	sw 	$s6, 0($s3)
+	lw 	$s6, 12($s5)
+	sw 	$s6, 4($s3)
+	lw 	$s6, 16($s5)
+	sw 	$s6, 8($s3)
+	lw 	$s6, 20($s5)
+	sw 	$s6, 12($s3)
+	
+	l.s 	$f12, 24 ($s5)
+	s.s 	$f12, 16($s3)
+	
+	j	rnk_loop1
+
+rnk_igual:
+	
+	lw	$t1, 16 ($s3)
+	lw	$t2, 24 ($s5)
+	add	$t1, $t1, $t2
+	sw	$t1, 16 ($s3)
+	
+	j	rnk_loop1
+	
+#-----------------------------------------------		
+rnk_loop2:
+
+	la	$s4, dynamicArray
+	addi	$s4, $s4, -20
+	beq	$s4, $s3, rnk_fim
+	
+	lw	$t1, 16 ($s4)
+	
 	
 r2:	
-	addi $t3, $t3, 1	#adicionar um ao i e 28 ao endereço do incioArray
-	slt $t4, $t3, $t0
-	bne  $t4, $zero, r1	#se i < = ao contador, volta loop
-	beq $t4, $t3, r1
+	addi 	$t3, $t3, 1	#adicionar um ao i e 28 ao endereço do incioArray
+	slt 	$t4, $t3, $t0
+	bne  	$t4, $zero, r1	#se i < = ao contador, volta loop
+	beq 	$t4, $t3, r1
 	
 				#se nao for igual a nenhum, colocamos um novo no array
-	addi $t0, $t0, 1	#soma 1 ao contador
-	addi $t1, $t1, 20	#proximo espaço vazio do array
-	lw $s6, 8($t2)		
-	sw $s6, 0($t1)
-	lw $s6, 12($t2)
-	sw $s6, 4($t1)
-	lw $s6, 16($t2)
-	sw $s6, 8($t1)
-	lw $s6, 20($t2)
-	sw $s6, 12($t1)
-	
-	l.s $f12, 24 ($t2)
-	s.s $f12, 16($t1)
+	addi 	$t0, $t0, 1	#soma 1 ao contador
+	addi 	$t1, $t1, 20	#proximo espaço vazio do array
+	lw 	$s6, 8($t2)		
+	sw 	$s6, 0($t1)
+	lw 	$s6, 12($t2)
+	sw 	$s6, 4($t1)
+	lw 	$s6, 16($t2)
+	sw 	$s6, 8($t1)
+	lw 	$s6, 20($t2)
+	sw 	$s6, 12($t1)
+		
+	l.s 	$f12, 24 ($t2)
+	s.s 	$f12, 16($t1)
 
 r3:
-	addi $t2, $t2, 28
-	bne $s1, $t2, r0
+	addi 	$t2, $t2, 28
+	bne 	$s1, $t2, r0
 	
 	#novo loop para printar resultado (contador em $t0)
 	
+rnk_fim:
 	
-	j menu1 #debug
+	j 	menu1 #debug
 #---------------------------------------------------------------------------------------------------#
+
 sairPrograma:
-	li $v0, 10						#Codigo para encerrar o programa
+	li 	$v0, 10						#chamada para encerrar o programa
 	syscall
