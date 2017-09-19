@@ -146,15 +146,12 @@ registrar:
 #=================================================================
 #-----------------------Operacao 2--------------------------------
 #=================================================================	
-
 excluir:
 #2) Excluir despesa: excluir dados de uma despesa identificada pelo id informado pelo usuario
 
 #=================================================================
 #-----------------------Operacao 3--------------------------------
 #=================================================================	
-
-
 listar_despesas:
 #3) Listar despesas: exibir dados de todas as despesas cadastradas  (ordenadas por data)
 	la	$a0, msg_despeza
@@ -234,18 +231,60 @@ sair:
 #=================================================================
 #-----------------------Operacao 4--------------------------------
 #=================================================================	
-
-
 exibir_gastos:
 #4) Exibir gasto mensal: com base nos dados de todas as despesas registradas, exibir o valor
 #total dos gastos em cada mes
+	
+	#2-passar por todo inicioArray
+	#3-se igual, soma valor (byte 24)
+	#4-se diferente, adiciona novo mes
+	#5-parar quando endereço = s1
+	#endereço final em s1
+	la $s2, inicioArray
+	la $s3, dynamicArray
+	addi $t2, $s3, 5 #contador dynamicArray
+	
+	lb $t0, 6($s2)	#1-setar primeiro mes (byte 6)
+	sb $t0,0($s3)
+	l.s $f12, 24 ($s2)
+	s.s $f12, 1($s3)
+	beq $s2,$s1, exibir
+	
+exibir_loop:
+	beq $s2,$s1, exibir_loop2
+	addi $s2, $s2, -28
+	
+	lb $t1, 6($s2)
+	beq $t0, $t1, somar
+	#criarnovo espaço
+	addi $t2, $t2, 5
+	
+	j exibir_loop
+	
+exibir_loop2:
+	la $s2, inicioArray
+	addi $s3, $s3, 5
+	slt 	$t4, $s3, $t2
+	bne  	$t4, $zero, exibir_loop	#se i < = ao contador, volta loop
+	beq 	$t4, $t3, exibir_loop
+	j exibir
+	
+somar:
+	
+exibir:
 
+exibir_sair:
+	la	$a0, msg_reg7	#mensagem de termino
+	addi	$v0, $zero, 4
+	syscall
+	
+	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
+	syscall
 
+	j	menu1
 #=================================================================
 #-----------------------Operacao 5--------------------------------
 #=================================================================	
-
-
 exibir_p_categoria:
 #5) Exibir gasto por categoria: com base nos dados de todas as despesas registradas, exibir o
 #valor total dos gastos por categoria, organizadas em ordem alfabÃƒÆ’Ã‚Â©tica
