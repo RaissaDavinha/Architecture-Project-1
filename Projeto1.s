@@ -2,6 +2,11 @@
 #	BRUNO ITENS 2 E 4
 #	RAFAEL ITENS 1 E 5
 #	RAISSA ITENS 3 E 6
+#
+#	Mudar item 1 para receber e ordenar por data
+#	Itens que cada um vai fazer foimodificado
+#	Registradores com endereÃ§o do ArrayPointer e do valor do ArayPointer foram modificados
+#
 #----------------------------------------------------------------
 .data
  # user program data
@@ -20,14 +25,11 @@
 	msg_despeza:	.asciiz		"\nDespezas: "
 	msg_gasto:	.asciiz 	"\nGasto mensal: "
 	msg_categoria:	.asciiz 	" | Categoria: "
-	msg_ranking:	.asciiz 	"\nRanking: "
+	msg_ranking:	.asciiz 	"\nRanking:\n"
 	msg_data:	.asciiz		" | Data:"
 	msg_id:		.asciiz		"\nId:"
 	msg_valor:	.asciiz		" | Valor: "
 	barra:		.asciiz 	"/"
-	msg_reg8:	.asciiz		"/nmês  |  gasto/n"
-	msg_enne:	.asciiz		"/n"
-	msg_espaco:	.asciiz		"  |  "
 	id:		.word		0
 	#inicioArray precisa armazenar id  (4 bytes), data  (6 numeros, 4 bytes), categoria  (16 bytes), valor  (.float, 4 bytes), TOTAL = 28 bytes
 
@@ -311,101 +313,224 @@ sair:
 #=================================================================
 #-----------------------Operacao 4--------------------------------
 #=================================================================	
+
+
 exibir_gastos:
 #4) Exibir gasto mensal: com base nos dados de todas as despesas registradas, exibir o valor
 #total dos gastos em cada mes
 
-	#1-setar primeiro mes (byte 6)
-	#2-passar por todo inicioArray
-	#3-se igual, soma valor (byte 24)
-	#4-se diferente, adiciona novo mes
-	#5-parar quando endereço = s1
-
-	la $s2, inicioArray
-	la $s3, dynamicArray
-	addi $t2, $s3, -5 #contador dynamicArray = i
-	
-	lb $t0, 6($s2)	#preenche primeiro espaço
-	sb $t0,0($s3)
-	l.s $f12, 24 ($s2)
-	s.s $f12, 1($s3)
-	beq $s2,$s1, exibir
-	
-exibir_loop:
-	beq $s3,$t2, exibir_espaco	#verifica se os itens do dynamicArray acabaram
-	addi $s3, $s3, -5
-	lb $t0, 0($s3)			#pega mes da posiçao
-	
-	lb $t1, 6($s2)			#pega mes
-	beq $t0, $t1, somar		#se igual ao mes guardado em t0, soma
-	j exibir_loop			#se nao igual, tentar proximo
-exibir_loop2:
-	la $s3, dynamicArray		#volta para posiçao inicial
-	addi $s2, $s2, -28		#proximo espaço do inicioArray
-	lb $t0, 0($s3)			#carrega mes da primeira posiçao novamente
-	slt 	$t4, $s2, $s1		#verifica se incioArray chegou ao final
-	bne  	$t4, $zero, exibir_loop	#se for <= ao endereço final, ele repete
-	beq 	$t4, $t3, exibir_loop
-	j exibir_espaco			#se nao for, printa o resultado
-	
-somar:
-	l.s $f12, 24 ($s2)
-	l.s $f11, 1($s3)
-	add.s $f12, $f11, $f12
-	l.s $f12, 1($s3)
-
-	j exibir_loop2
-	
-exibir_espaco:	
-	#criarnovo espaço
-	addi $t2, $t2, -5	#proximo espaço do dynamicArray
-	lb $t0, 6($s2)		#pega mes
-	sb $t0,0($t2)		#salva mes
-	l.s $f12, 24 ($s2)	#pega .float
-	s.s $f12, 1($t2)	#salva .float
-	
-	j exibir_loop2		#vai para proximo espaco do incioArray
-	
-exibir:
-	la $s3, dynamicArray	#volta ponteiro para incio do dynamicArray
-exibir_loop3:
-	la $a0, msg_reg8
-	addi $v0, $zero, 4
-	syscall
-
-	lb $a0, 0($s3)
-	addi $v0, $zero, 1
-	syscall
-	
-	la $a0, msg_espaco
-	addi $v0, $zero, 4
-	syscall
-	
-	l.s $f12, 1($s3)
-	addi $v0, $zero, 2
-	syscall
-	
-	la $a0, msg_enne
-	addi $v0, $zero, 4
-	syscall
-
-exibir_sair:
-	la	$a0, msg_reg7	#mensagem de termino
-	addi	$v0, $zero, 4
-	syscall
-	
-	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
-	syscall
-
-	j	menu1
 
 #=================================================================
 #-----------------------Operacao 5--------------------------------
-#=================================================================
+#=================================================================	
+
+
+
+
 exibir_p_categoria:
 #5) Exibir gasto por categoria: com base nos dados de todas as despesas registradas, exibir o
-#valor total dos gastos por categoria, organizadas em ordem alfabÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©tica
+#valor total dos gastos por categoria, organizadas em ordem alfabetica
+	la	$a0, msg_ranking
+	addi	$v0, $zero, 4
+	syscall
+	
+	#0-contador para quantidade de categorias
+	#1- pega primeira categoria e manda pro dynamicArray (posiÃ§ao 8)
+	#2-pega proxima categoria e compara
+	#3-se igual, apenas soma despezas, se diferente, manda pro dynamicArray e soma um no contador
+	#4-vai para proxima categoria
+	la	$s0, arrayPointer
+	lw	$s1, 0 ($s0)
 
+	la 	$s4, dynamicArray
+	add	$s3, $s4,$zero
+	la 	$s5, inicioArray
+
+	
+	beq	$s5, $s1, cat_exit
+	
+	addi	$s5, $s5, -28
+	addi	$s3, $s3, -20
+	
+	lw 	$s6, 8($s5)	#primeira categoria
+	sw 	$s6, 0($s3)
+	lw 	$s6, 12($s5)
+	sw 	$s6, 4($s3)
+	lw 	$s6, 16($s5)
+	sw 	$s6, 8($s3)
+	lw 	$s6, 20($s5)
+	sw 	$s6, 12($s3)
+	
+	l.s 	$f12, 24 ($s5)
+	s.s 	$f12, 16($s3)
+	
+	
+cat_loop1:
+	
+	beq	$s5, $s1, cat_loop2
+	addi 	$s5, $s5, -28
+	add	$t3, $s4, $zero
+	
+cat_dif:	
+	
+	beq	$t3, $s3, cat_diferente
+	addi	$t3, $t3, -20
+	
+	
+	lw	$t0, 8 ($s5)
+	lw	$t1, 0 ($t3)
+	bne	$t1, $t0, cat_dif
+	
+	lw	$t0, 12 ($s5)
+	lw	$t1, 4 ($t3)
+	bne	$t1, $t0, cat_dif
+	
+	lw	$t0, 16 ($s5)
+	lw	$t1, 8 ($t3)
+	bne	$t1, $t0, cat_dif
+	
+	lw	$t0, 20 ($s5)
+	lw	$t1, 12 ($t3)
+	bne	$t1, $t0, cat_dif
+	
+	
+	j	cat_igual
+	
+	
+cat_diferente:
+
+	addi	$s3, $s3, -20		
+	
+	lw 	$s6, 8($s5)	#primeira categoria
+	sw 	$s6, 0($s3)
+	lw 	$s6, 12($s5)
+	sw 	$s6, 4($s3)
+	lw 	$s6, 16($s5)
+	sw 	$s6, 8($s3)
+	lw 	$s6, 20($s5)
+	sw 	$s6, 12($s3)
+	
+	l.s 	$f12, 24 ($s5)
+	s.s 	$f12, 16($s3)
+	
+	j	cat_loop1
+
+cat_igual:
+	
+	l.s	$f0, 16 ($t3)
+	l.s	$f1, 24 ($s5)
+	add.s	$f0, $f0, $f1
+	s.s	$f0, 16 ($t3)
+	
+	j	cat_loop1
+	
+#-----------------------------------------------		
+cat_loop2:
+
+	la	$s4, dynamicArray
+	
+	add	$s6, $s3, $zero
+	
+	addi	$s4, $s4, -20
+	beq	$s4, $s3, cat_fim
+	addi	$s4, $s4, 20
+		
+	j	cat_bubble2
+			
+cat_bubble1:	
+	
+	addi	$s6, $s6, 20
+	la	$s4, dynamicArray
+	beq	$s4, $s6, cat_fim	
+	
+cat_bubble2:
+
+	addi	$s4, $s4, -20
+	beq	$s4, $s6, cat_bubble1
+
+	lw	$t0, 0 ($s4)
+	lw	$t1, -20 ($s4)
+	
+	slt	$t3, $t1, $t0
+	beq	$t3, $zero, cat_bubble2
+	
+	lw	$t0, 4 ($s4)
+	lw	$t1, -16 ($s4)
+	
+	slt	$t3, $t1, $t0
+	beq	$t3, $zero, cat_bubble2
+	
+	lw	$t0, 8 ($s4)
+	lw	$t1, -12 ($s4)
+	
+	slt	$t3, $t1, $t0
+	beq	$t3, $zero, cat_bubble2
+	
+	lw	$t0, 12 ($s4)
+	lw	$t1, -8 ($s4)
+	
+	slt	$t3, $t1, $t0
+	beq	$t3, $zero, cat_bubble2
+
+	
+	lw	$t0, 0 ($s4)
+	lw	$t1, -20 ($s4)
+	sw	$t0, -20 ($s4)
+	sw	$t1, 0 ($s4)
+	lw	$t0, 4 ($s4)
+	lw	$t1, -16 ($s4)
+	sw	$t0, -16 ($s4)
+	sw	$t1, 4 ($s4)
+	lw	$t0, 8 ($s4)
+	lw	$t1, -12 ($s4)
+	sw	$t0, -12 ($s4)
+	sw	$t1, 8 ($s4)
+	lw	$t0, 12 ($s4)
+	lw	$t1, -8 ($s4)
+	sw	$t0, -8 ($s4)
+	sw	$t1, 12 ($s4)
+	
+	l.s	$f0, 16 ($s4)
+	l.s	$f1, -4 ($s4)
+	s.s	$f0, -4 ($s4)
+	s.s	$f1, 16 ($s4)
+		
+	j	cat_bubble2	
+				
+	
+
+cat_fim:
+	
+	la	$s4, dynamicArray
+	add	$s6, $s3, $zero
+	
+cat_print:
+
+	beq	$s4, $s6, cat_exit
+	addi	$s4, $s4, -20
+	
+	la	$a0, msg_valor
+	addi	$v0, $zero, 4
+	syscall
+	
+	l.s	$f12, 16 ($s4)
+	addi	$v0, $zero, 2
+	syscall
+	
+	la	$a0, msg_categoria
+	addi	$v0, $zero, 4
+	syscall
+	
+	add	$a0, $s4, $zero
+	addi	$v0, $zero, 4
+	syscall
+	
+
+	j	cat_print
+
+												
+cat_exit:
+	j 	menu1 #debug
 
 
 #=================================================================
@@ -429,6 +554,7 @@ ranking:
 	la 	$s4, dynamicArray
 	add	$s3, $s4,$zero
 	la 	$s5, inicioArray
+
 	
 	beq	$s5, $s1, rnk_exit
 	
@@ -447,6 +573,7 @@ ranking:
 	l.s 	$f12, 24 ($s5)
 	s.s 	$f12, 16($s3)
 	
+	
 rnk_loop1:
 	
 	beq	$s5, $s1, rnk_loop2
@@ -457,6 +584,7 @@ rnk_dif:
 	
 	beq	$t3, $s3, rnk_diferente
 	addi	$t3, $t3, -20
+	
 	
 	lw	$t0, 8 ($s5)
 	lw	$t1, 0 ($t3)
@@ -474,7 +602,9 @@ rnk_dif:
 	lw	$t1, 12 ($t3)
 	bne	$t1, $t0, rnk_dif
 	
+	
 	j	rnk_igual
+	
 	
 rnk_diferente:
 
@@ -531,7 +661,7 @@ rnk_bubble2:
 	l.s	$f2, -4 ($s4)
 	
 	c.lt.s	$f1, $f2
-	bc1t	rnk_bubble2
+	bc1f	rnk_bubble2
 	
 	lw	$t0, 0 ($s4)
 	lw	$t1, -20 ($s4)
@@ -555,7 +685,9 @@ rnk_bubble2:
 	s.s	$f0, -4 ($s4)
 	s.s	$f1, 16 ($s4)
 		
-	j	rnk_bubble2
+	j	rnk_bubble2	
+				
+	
 
 rnk_fim:
 	
@@ -565,12 +697,13 @@ rnk_fim:
 rnk_print:
 
 	beq	$s4, $s6, rnk_exit
+	addi	$s4, $s4, -20
 	
 	la	$a0, msg_valor
 	addi	$v0, $zero, 4
 	syscall
 	
-	l.s	$f12, 16 ($s6)
+	l.s	$f12, 16 ($s4)
 	addi	$v0, $zero, 2
 	syscall
 	
@@ -578,11 +711,10 @@ rnk_print:
 	addi	$v0, $zero, 4
 	syscall
 	
-	add	$a0, $s6, $zero
+	add	$a0, $s4, $zero
 	addi	$v0, $zero, 4
 	syscall
 	
-	addi	$s6, $s6, 20
 	j	rnk_print
 
 												
