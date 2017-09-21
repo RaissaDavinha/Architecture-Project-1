@@ -2,6 +2,11 @@
 #	BRUNO ITENS 2 E 4
 #	RAFAEL ITENS 1 E 5
 #	RAISSA ITENS 3 E 6
+#
+#	Mudar item 1 para receber e ordenar por data
+#	Itens que cada um vai fazer foimodificado
+#	Registradores com endereÃ§o do ArrayPointer e do valor do ArayPointer foram modificados
+#
 #----------------------------------------------------------------
 .data
  # user program data
@@ -20,14 +25,12 @@
 	msg_despeza:	.asciiz		"\nDespezas: "
 	msg_gasto:	.asciiz 	"\nGasto mensal: "
 	msg_categoria:	.asciiz 	" | Categoria: "
-	msg_ranking:	.asciiz 	"\nRanking:\n"
+	msg_ranking:	.asciiz 	"\nRanking categorias:\n"
+	msg_ranking2:	.asciiz 	"\nCategorias:\n"
 	msg_data:	.asciiz		" | Data:"
 	msg_id:		.asciiz		"\nId:"
 	msg_valor:	.asciiz		" | Valor: "
 	barra:		.asciiz 	"/"
-	msg_reg8:	.asciiz		"/nmês  |  gasto/n"
-	msg_enne:	.asciiz		"/n"
-	msg_espaco:	.asciiz		"  |  "
 	id:		.word		0
 	#inicioArray precisa armazenar id  (4 bytes), data  (6 numeros, 4 bytes), categoria  (16 bytes), valor  (.float, 4 bytes), TOTAL = 28 bytes
 
@@ -212,12 +215,17 @@ fim_insrt:
 #=================================================================
 #-----------------------Operacao 2--------------------------------
 #=================================================================	
+
 excluir:
 #2) Excluir despesa: excluir dados de uma despesa identificada pelo id informado pelo usuario
 
 #=================================================================
 #-----------------------Operacao 3--------------------------------
 #=================================================================
+
+		
+
+
 listar_despesas:
 #3) Listar despesas: exibir dados de todas as despesas cadastradas  (ordenadas por data)
 	
@@ -306,102 +314,24 @@ sair:
 #=================================================================
 #-----------------------Operacao 4--------------------------------
 #=================================================================	
+
+
 exibir_gastos:
 #4) Exibir gasto mensal: com base nos dados de todas as despesas registradas, exibir o valor
 #total dos gastos em cada mes
 
-	#1-setar primeiro mes (byte 6)
-	#2-passar por todo inicioArray
-	#3-se igual, soma valor (byte 24)
-	#4-se diferente, adiciona novo mes
-	#5-parar quando endereÃ§o = s1
-
-	la $s2, inicioArray
-	la $s3, dynamicArray
-	addi $t2, $s3, -8 #contador dynamicArray = i
-	
-	lb $t0, 6($s2)	#preenche primeiro espaÃ§o
-	sb $t0,0($s3)
-	l.s $f12, 24 ($s2)
-	s.s $f12, 4($s3)
-	beq $s2,$s1, exibir
-	
-exibir_loop:
-	beq $s2,$s1, exibir		#verifica de acabou os itens inicioArray
-	addi $s3, $s3, -8
-	lb $t0, 0($s3)			#pega mes da posiÃ§ao
-	
-	lb $t1, 6($s2)			#pega mes
-	beq $t0, $t1, somar		#se igual ao mes guardado em t0, soma
-	beq $s3,$t2, exibir_espaco	#verifica se os itens do dynamicArray acabaram
-	j exibir_loop2			#se nao igual, tentar proximo
-exibir_loop2:
-	la $s3, dynamicArray		#volta para posiÃ§ao inicial
-	addi $s2, $s2, -28		#proximo espaÃ§o do inicioArray
-	lb $t0, 0($s3)			#carrega mes da primeira posiÃ§ao novamente
-	slt 	$t4, $s2, $s1		#verifica se incioArray chegou ao final
-	bne  	$t4, $zero, exibir_loop	#se for <= ao endereÃ§o final, ele repete
-	beq 	$t4, $t3, exibir_loop
-	j exibir_espaco			#se nao for, printa o resultado
-	
-somar:
-	l.s $f12, 24 ($s2)
-	l.s $f4, 4($s3)
-	add.s $f12, $f4, $f12
-	l.s $f12, 4($s3)
-
-	j exibir_loop2
-	
-exibir_espaco:	
-	#criarnovo espaÃ§o
-	addi $t2, $t2, -8	#proximo espaÃ§o do dynamicArray
-	lb $t0, 6($s2)		#pega mes
-	sb $t0,0($t2)		#salva mes
-	l.s $f12, 24 ($s2)	#pega .float
-	s.s $f12, 4($t2)	#salva .float
-	
-	j exibir_loop2		#vai para proximo espaco do incioArray
-	
-exibir:
-	la $s3, dynamicArray	#volta ponteiro para incio do dynamicArray
-exibir_loop3:
-	la $a0, msg_reg8
-	addi $v0, $zero, 4
-	syscall
-
-	lb $a0, 0($s3)
-	addi $v0, $zero, 1
-	syscall
-	
-	la $a0, msg_espaco
-	addi $v0, $zero, 4
-	syscall
-	
-	l.s $f12, 4($s3)
-	addi $v0, $zero, 2
-	syscall
-	
-	la $a0, msg_enne
-	addi $v0, $zero, 4
-	syscall
-
-exibir_sair:
-	la	$a0, msg_reg7	#mensagem de termino
-	addi	$v0, $zero, 4
-	syscall
-	
-	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
-	syscall
-
-	j	menu1
 
 #=================================================================
 #-----------------------Operacao 5--------------------------------
 #=================================================================	
+
+
+
+
 exibir_p_categoria:
 #5) Exibir gasto por categoria: com base nos dados de todas as despesas registradas, exibir o
 #valor total dos gastos por categoria, organizadas em ordem alfabetica
-	la	$a0, msg_ranking
+	la	$a0, msg_ranking2
 	addi	$v0, $zero, 4
 	syscall
 	
@@ -435,6 +365,7 @@ exibir_p_categoria:
 	l.s 	$f12, 24 ($s5)
 	s.s 	$f12, 16($s3)
 	
+	
 cat_loop1:
 	
 	beq	$s5, $s1, cat_loop2
@@ -463,7 +394,9 @@ cat_dif:
 	lw	$t1, 12 ($t3)
 	bne	$t1, $t0, cat_dif
 	
+	
 	j	cat_igual
+	
 	
 cat_diferente:
 
@@ -515,31 +448,53 @@ cat_bubble2:
 
 	addi	$s4, $s4, -20
 	beq	$s4, $s6, cat_bubble1
+	add	$t2, $zero, $zero
+	
+	addi	$a0, $s4, -20
+	addi	$a1, $s4, 0
+	addi	$t3, $a1, 16
+	
+#--------------------------------------------
+cat_strcmp:
 
-	lw	$t0, 0 ($s4)
-	lw	$t1, -20 ($s4)
+	lbu	$t0, 0, ($a0)
+	lbu	$t1, 0, ($a1)
+	sltu	$t2, $t0, $t1
+	beq	$t0, $t1, cat_j1
+	beq	$t2, $zero, cat_bubble2
+	j	cat_bubble3
+
+cat_j1:	lbu	$t0, 1, ($a0)
+	lbu	$t1, 1, ($a1)
+	sltu	$t2, $t0, $t1
+	beq	$t0, $t1, cat_j2
+	beq	$t2, $zero, cat_bubble2
+	j	cat_bubble3
 	
-	slt	$t3, $t1, $t0
-	beq	$t3, $zero, cat_bubble2
+cat_j2:	lbu	$t0, 2, ($a0)
+	lbu	$t1, 2, ($a1)
+	sltu	$t2, $t0, $t1
+	beq	$t0, $t1, cat_j3
+	beq	$t2, $zero, cat_bubble2
+	j	cat_bubble3
+
+cat_j3:	lbu	$t0, 3, ($a0)
+	lbu	$t1, 3, ($a1)
+	sltu	$t2, $t0, $t1
+	beq	$t0, $t1, cat_j4
+	beq	$t2, $zero, cat_bubble2
+	j	cat_bubble3
+
+cat_j4:	addi	$a0, $a0, 4
+	addi	$a1, $a1, 4
+	beq	$t3, $a1, cat_bubble3
 	
-	lw	$t0, 4 ($s4)
-	lw	$t1, -16 ($s4)
-	
-	slt	$t3, $t1, $t0
-	beq	$t3, $zero, cat_bubble2
-	
-	lw	$t0, 8 ($s4)
-	lw	$t1, -12 ($s4)
-	
-	slt	$t3, $t1, $t0
-	beq	$t3, $zero, cat_bubble2
-	
-	lw	$t0, 12 ($s4)
-	lw	$t1, -8 ($s4)
-	
-	slt	$t3, $t1, $t0
-	beq	$t3, $zero, cat_bubble2
-	
+	j	cat_strcmp
+
+
+#----------------------------------------------
+cat_bubble3:
+
 	lw	$t0, 0 ($s4)
 	lw	$t1, -20 ($s4)
 	sw	$t0, -20 ($s4)
@@ -564,6 +519,8 @@ cat_bubble2:
 		
 	j	cat_bubble2	
 				
+	
+
 cat_fim:
 	
 	la	$s4, dynamicArray
@@ -589,11 +546,21 @@ cat_print:
 	add	$a0, $s4, $zero
 	addi	$v0, $zero, 4
 	syscall
+	
 
 	j	cat_print
-											
+
+												
 cat_exit:
+	la	$a0, msg_reg7	#mensagem de termino
+	addi	$v0, $zero, 4
+	syscall
+	
+	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
+	syscall
+
 	j 	menu1 #debug
+
 
 #=================================================================
 #-----------------------Operacao 6--------------------------------
@@ -634,6 +601,7 @@ ranking:
 	
 	l.s 	$f12, 24 ($s5)
 	s.s 	$f12, 16($s3)
+	
 	
 rnk_loop1:
 	
@@ -780,6 +748,14 @@ rnk_print:
 
 												
 rnk_exit:
+	la	$a0, msg_reg7	#mensagem de termino
+	addi	$v0, $zero, 4
+	syscall
+	
+	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
+	syscall
+
+
 	j 	menu1 #debug
 
 #---------------------------------------------------------------------------------------------------#
