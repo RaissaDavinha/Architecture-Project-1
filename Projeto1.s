@@ -232,41 +232,41 @@ excluir:
 
 	la 	$s2, inicioArray
 		
-	beq	$s2, $s1, exc_falha	
+	beq	$s2, $s1, exc_falha	#se nao existe lista, para a execução
 	
 		
 	procura_id:
 	
-		addi 	$s2, $s2, -28
+		addi 	$s2, $s2, -28		#sobe o pointer da array
 		
-		lw	$s5, 0($s2)
-		beq 	$s5, $s4, exc_shift
-		beq	$s2, $s1, exc_falha
-		j	procura_id
+		lw	$s5, 0($s2)		#pega o ID da posição atual
+		beq 	$s5, $s4, exc_shift	#se igual a o inserido, executa	
+		beq	$s2, $s1, exc_falha	#se final da array, para a execução
+		j	procura_id		#se nao é igual, volta para o loop
 		
 	
 		exc_shift:
 			
-			lw	$t0, -28 ($s2)	
-			sw	$t0, 0 ($s2)
+			lw	$t0, -28 ($s2)	#pega as informações da despesa segunite
+			sw	$t0, 0 ($s2)	#copia para a despesa atual
 			lw	$t0, -24 ($s2)	
 			sw	$t0, 4 ($s2)
 			lw	$t0, -20 ($s2)	
 			sw	$t0, 8 ($s2)
 			lw	$t0, -16 ($s2)	
 			sw	$t0, 12 ($s2)
-			lw	$t0, -12 ($s2)	#ID
+			lw	$t0, -12 ($s2)
 			sw	$t0, 16 ($s2)
-			lw	$t0, -8 ($s2)	#ID
+			lw	$t0, -8 ($s2)
 			sw	$t0, 20 ($s2)
-			lw	$t0, -4 ($s2)	#ID
+			lw	$t0, -4 ($s2)
 			sw	$t0, 24 ($s2)
 			
-			beq	$s1, $s2, exc_suces
+			beq	$s1, $s2, exc_suces	#se fim da array, para a execução
 			
-			addi	$s2, $s2, -28														
+			addi	$s2, $s2, -28		#se não, muda para a proxima despesa												
 																																													
-			j	exc_shift
+			j	exc_shift		#e repete o processo
 	
 	exc_falha:
 		
@@ -281,7 +281,7 @@ exc_suces:	la	$a0, msg_exc	#mensagem de excluido com sucesso
 		addi	$v0, $zero, 4
 		syscall	
 		
-		addi	$s1, $s1, 28
+		addi	$s1, $s1, 28	#caso sucesso, dimiui o tamanho da array em -1 despesa
 		sw	$s1, 0 ($s0)
 		
 exc_exit:	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
