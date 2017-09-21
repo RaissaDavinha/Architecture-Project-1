@@ -1,12 +1,7 @@
-#--------OBSERVACOES E ATUALIZACOES------------------------------
-#	BRUNO ITENS 2 E 4
-#	RAFAEL ITENS 1 E 5
-#	RAISSA ITENS 3 E 6
-#
-#	Mudar item 1 para receber e ordenar por data
-#	Itens que cada um vai fazer foimodificado
-#	Registradores com endereco do ArrayPointer e do valor do ArayPointer foram modificados
-#
+#-----------------------GRUPO------------------------------------
+#Raissa Furlan Davinha	       RA:15032006
+#Rafael Fioramonte             RA:16032708
+#Bruno Vicente Donaio Kitaka   RA:16156341
 #----------------------------------------------------------------
 .data
  # user program data
