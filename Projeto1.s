@@ -314,46 +314,47 @@ exibir_gastos:
 	#2-passar por todo inicioArray
 	#3-se igual, soma valor (byte 24)
 	#4-se diferente, adiciona novo mes
-	#5-parar quando endereço = s1
+	#5-parar quando endereÃ§o = s1
 
 	la $s2, inicioArray
 	la $s3, dynamicArray
-	addi $t2, $s3, -5 #contador dynamicArray = i
+	addi $t2, $s3, -8 #contador dynamicArray = i
 	
-	lb $t0, 6($s2)	#preenche primeiro espaço
+	lb $t0, 6($s2)	#preenche primeiro espaÃ§o
 	sb $t0,0($s3)
 	l.s $f12, 24 ($s2)
 	s.s $f12, 4($s3)
 	beq $s2,$s1, exibir
 	
 exibir_loop:
-	beq $s3,$t2, exibir_espaco	#verifica se os itens do dynamicArray acabaram
-	addi $s3, $s3, -5
-	lb $t0, 0($s3)			#pega mes da posiçao
+	beq $s2,$s1, exibir		#verifica de acabou os itens inicioArray
+	addi $s3, $s3, -8
+	lb $t0, 0($s3)			#pega mes da posiÃ§ao
 	
 	lb $t1, 6($s2)			#pega mes
 	beq $t0, $t1, somar		#se igual ao mes guardado em t0, soma
-	j exibir_loop			#se nao igual, tentar proximo
+	beq $s3,$t2, exibir_espaco	#verifica se os itens do dynamicArray acabaram
+	j exibir_loop2			#se nao igual, tentar proximo
 exibir_loop2:
-	la $s3, dynamicArray		#volta para posiçao inicial
-	addi $s2, $s2, -28		#proximo espaço do inicioArray
-	lb $t0, 0($s3)			#carrega mes da primeira posiçao novamente
+	la $s3, dynamicArray		#volta para posiÃ§ao inicial
+	addi $s2, $s2, -28		#proximo espaÃ§o do inicioArray
+	lb $t0, 0($s3)			#carrega mes da primeira posiÃ§ao novamente
 	slt 	$t4, $s2, $s1		#verifica se incioArray chegou ao final
-	bne  	$t4, $zero, exibir_loop	#se for <= ao endereço final, ele repete
+	bne  	$t4, $zero, exibir_loop	#se for <= ao endereÃ§o final, ele repete
 	beq 	$t4, $t3, exibir_loop
 	j exibir_espaco			#se nao for, printa o resultado
 	
 somar:
 	l.s $f12, 24 ($s2)
-	l.s $f11, 4($s3)
-	add.s $f12, $f11, $f12
+	l.s $f4, 4($s3)
+	add.s $f12, $f4, $f12
 	l.s $f12, 4($s3)
 
 	j exibir_loop2
 	
 exibir_espaco:	
-	#criarnovo espaço
-	addi $t2, $t2, -5	#proximo espaço do dynamicArray
+	#criarnovo espaÃ§o
+	addi $t2, $t2, -8	#proximo espaÃ§o do dynamicArray
 	lb $t0, 6($s2)		#pega mes
 	sb $t0,0($t2)		#salva mes
 	l.s $f12, 24 ($s2)	#pega .float
