@@ -19,15 +19,15 @@
 	msg_menu2:	.asciiz 	"\nErro! O numero que foi selecionado nao e valido!\n"
 	msg_despeza:	.asciiz		"\nDespezas: "
 	msg_catdespeza:	.asciiz		"\nDespezas por categoria: \n"
-	msg_gasto:	.asciiz 	"\nGasto mensal: "
+	msg_gasto:	.asciiz 	"\nGasto mensal: \n"
 	msg_categoria:	.asciiz 	" | Categoria: "
 	msg_ranking:	.asciiz 	"\nRanking:\n"
 	msg_data:	.asciiz		" | Data:"
 	msg_id:		.asciiz		"\nId:"
 	msg_valor:	.asciiz		" | Valor: "
 	barra:		.asciiz 	"/"
-	msg_reg8:	.asciiz		"/nmes  |  gasto/n"
-	msg_enne:	.asciiz		"/n"
+	msg_reg8:	.asciiz		"\nmes  |  gasto\n"
+	msg_enne:	.asciiz		"\n"
 	msg_espaco:	.asciiz		"  |  "
 	id:		.word		0
 	#inicioArray precisa armazenar id  (4 bytes), data  (6 numeros, 4 bytes), categoria  (16 bytes), valor  (.float, 4 bytes), TOTAL = 28 bytes
@@ -35,7 +35,7 @@
 .text 			
 .globl main
 main:	
-	#$s0 = endereÃƒÂ§o array pointer
+	#$s0 = endereÃƒÆ’Ã‚Â§o array pointer
 	#$s1 = condteudo array pointer
 	la 	$s1, inicioArray	#Inicializacao do vetor. Ela sera encontrada o programa inteiro em $t0.
 	la 	$s0, arrayPointer	#endereco do arrayPointer em $s1
@@ -229,7 +229,7 @@ listar_despesas:
 	beq 	$s2, $s1, sair
 	
 	#1-pegar endereco inicial
-	#2-usar endereÃƒÂ§o para pegar dados
+	#2-usar endereÃƒÆ’Ã‚Â§o para pegar dados
 	#3-atualizar valor
 	#4-se valor nao for igual ao arraypointer, repetir
 	
@@ -304,38 +304,42 @@ sair:
 exibir_gastos:
 #4) Exibir gasto mensal: com base nos dados de todas as despesas registradas, exibir o valor
 #total dos gastos em cada mes
+	la	$a0, msg_gasto
+	addi	$v0, $zero, 4
+	syscall
 
 	#1-setar primeiro mes (byte 6)
-	#2-passar por todo inicioArray
+	#2-passar por todo dynamicArray
 	#3-se igual, soma valor (byte 24)
 	#4-se diferente, adiciona novo mes
-	#5-parar quando endereÃ§o = s1
+	#5-parar quando endereco = s1
 
 	la $s2, inicioArray
 	la $s3, dynamicArray
-	addi $t2, $s3, -5 #contador dynamicArray = i
+	add $t2, $s3, $zero #contador dynamicArray = i
+	addi $s2, $s2, -28
+	addi $s3, $s3, -8
 	
-	lb $t0, 6($s2)	#preenche primeiro espaÃ§o
+	lb $t0, 5($s2)	#preenche primeiro espaco
 	sb $t0,0($s3)
 	l.s $f12, 24 ($s2)
 	s.s $f12, 4($s3)
-	beq $s2,$s1, exibir
+	beq $s2,$s1, exibir	#se incioArray tiver apenas uma posicao, ja printa
 	
 exibir_loop:
-	beq $s3,$t2, exibir_loop2	#verifica se os itens do dynamicArray acabaram
-	addi $s3, $s3, -5
-	lb $t0, 0($s3)			#pega mes da posiÃ§ao
-	
-	lb $t1, 6($s2)			#pega mes
+	lb $t0, 0($s3)			#pega mes da posicao
+	lb $t1, 5($s2)			#pega mes
 	beq $t0, $t1, somar		#se igual ao mes guardado em t0, soma
+	
+	addi $s3, $s3, -8		#proximo espaco dynamicArray
+	beq $s3,$t2, exibir_espaco	#verifica se os itens do dynamicArray acabaram
 	j exibir_loop			#se nao igual, tentar proximo
 exibir_loop2:
-	la $s3, dynamicArray		#volta para posiÃ§ao inicial
-	addi $s2, $s2, -28		#proximo espaÃ§o do inicioArray
-	lb $t0, 0($s3)			#carrega mes da primeira posiÃ§ao novamente
-	slt 	$t4, $s2, $s1		#verifica se incioArray chegou ao final
-	bne  	$t4, $zero, exibir_loop	#se for <= ao endereÃ§o final, ele repete
-	beq 	$t4, $t3, exibir_loop
+	la $s3, dynamicArray		#volta para posicao inicial
+	addi $s2, $s2, -28		#proximo espaco do inicioArray
+	slt $t4, $s2, $s1		#verifica se incioArray chegou ao final
+	bne $t4, $zero, exibir_loop	#se for <= ao endereco final, ele repete
+	beq $t4, $t3, exibir_loop
 	j exibir_espaco			#se nao for, printa o resultado
 	
 somar:
@@ -347,9 +351,9 @@ somar:
 	j exibir_loop2
 	
 exibir_espaco:	
-	#criarnovo espaÃ§o
-	addi $t2, $t2, -5	#proximo espaÃ§o do dynamicArray
-	lb $t0, 6($s2)		#pega mes
+	#criar novo espaco
+	addi $t2, $t2, -8	#proximo espaÃƒÂ§o do dynamicArray
+	lb $t0, 5($s2)		#pega mes
 	sb $t0,0($t2)		#salva mes
 	l.s $f12, 24 ($s2)	#pega .float
 	s.s $f12, 4($t2)	#salva .float
@@ -378,14 +382,10 @@ exibir_loop3:
 	la $a0, msg_enne
 	addi $v0, $zero, 4
 	syscall
-
-exibir_sair:
-	la	$a0, msg_reg7	#mensagem de termino
-	addi	$v0, $zero, 4
-	syscall
 	
-	addi	$v0, $zero, 12	#para programa ate proxima tecla ser pressionada
-	syscall
+	slt 	$t4, $s3, $t2			#verifica se dynamicArray chegou ao final
+	bne  	$t4, $zero, exibir_loop3	#se for <= ao endereco final, ele repete
+	beq 	$t4, $t3, exibir_loop3
 
 	la	$a0, msg_reg7	#mensagem de termino
 	addi	$v0, $zero, 4
@@ -407,7 +407,7 @@ exibir_p_categoria:
 	syscall
 	
 	#0-contador para quantidade de categorias
-	#1- pega primeira categoria e manda pro dynamicArray (posiÃ§ao 8)
+	#1- pega primeira categoria e manda pro dynamicArray (posiÃƒÂ§ao 8)
 	#2-pega proxima categoria e compara
 	#3-se igual, apenas soma despezas, se diferente, manda pro dynamicArray e soma um no contador
 	#4-vai para proxima categoria
@@ -635,7 +635,7 @@ ranking:
 	syscall
 	
 	#0-contador para quantidade de categorias
-	#1- pega primeira categoria e manda pro dynamicArray (posiÃ§ao 8)
+	#1- pega primeira categoria e manda pro dynamicArray (posiÃƒÂ§ao 8)
 	#2-pega proxima categoria e compara
 	#3-se igual, apenas soma despezas, se diferente, manda pro dynamicArray e soma um no contador
 	#4-vai para proxima categoria
