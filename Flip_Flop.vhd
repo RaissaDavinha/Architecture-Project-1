@@ -10,7 +10,7 @@ ARCHITECTURE Behavior OF flipflop IS
 BEGIN
 	PROCESS
 	BEGIN
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1';
 		IF Resetn = '0' THEN
 			Q <= '0' ;
 		ELSE
