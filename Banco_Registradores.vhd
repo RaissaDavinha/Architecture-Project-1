@@ -15,26 +15,22 @@ END Banco_Registradores;
 ARCHITECTURE description OF Banco_Registradores IS
 
 component Registrador_8_bits PORT(
-    D   		: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
-    RegWrite: IN STD_LOGIC; -- load/enable.
-    Clear 	: IN STD_LOGIC; -- async. clear.
-    Clock 	: IN STD_LOGIC; -- clock.
-    Q   		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)); -- output
+   D   		: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+   RegWrite	: IN STD_LOGIC; -- load/enable.
+   Clear 	: IN STD_LOGIC; -- async. clear.
+   Clock 	: IN STD_LOGIC; -- clock.
+   Q   		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)); -- output
 END component;
 
-component Decodificador_2para4
-port(
-a : in STD_LOGIC_VECTOR(1 downto 0);
-b : out STD_LOGIC_VECTOR(3 downto 0)
-);
+component Decodificador_2para4 port(
+	a 			: in STD_LOGIC_VECTOR(1 downto 0);
+	b 			: out STD_LOGIC_VECTOR(3 downto 0));
 end component;
 
-component Tristate
-	PORT ( 
-	X : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
-	E : IN STD_LOGIC;
-	F : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-	);
+component Tristate PORT ( 
+	X 			: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+	E 			: IN STD_LOGIC;
+	F 			: OUT STD_LOGIC_VECTOR(7 DOWNTO 0));
 END component;
 
 SIGNAL	DecodResult1, DecodResult2 : STD_LOGIC_VECTOR(3 DownTO 0);

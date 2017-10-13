@@ -17,5 +17,5 @@ architecture bhv of Decodificador_2para4 is
 				when "10" => b <= "0010";
 				when "11" => b <= "0001";
 			end case;
-end process;
+		end process;
 end bhv;
