@@ -11,5 +11,5 @@ END Tristate ;
 
 ARCHITECTURE Behavior OF Tristate IS
 BEGIN
-	F <= (OTHERS => 'Z') WHEN E = '0' ELSE X;
+		F <= (OTHERS => 'Z') WHEN E = '0' ELSE X;
 END Behavior;

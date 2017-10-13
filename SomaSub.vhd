@@ -13,12 +13,12 @@ END SomaSub;
 
 ARCHITECTURE behavior OF SomaSub IS 
 BEGIN
-PROCESS(Sinal)
-	BEGIN
-			IF Sinal = '0' THEN 
-				Produto <= DataR1 + DataR2;
-			ELSE
-				Produto <= DataR1 - DataR2;
-			END IF;
+	PROCESS(Sinal)
+		BEGIN
+	IF Sinal = '0' THEN 
+		Produto <= DataR1 + DataR2;
+	ELSE
+		Produto <= DataR1 - DataR2;
+	END IF;
 	END PROCESS;
 END behavior;

@@ -27,17 +27,18 @@ SIGNAL ProdutoAux : STD_LOGIC_VECTOR (7 DOWNTO 0);
 BEGIN
 
 	stage0: SomaSub PORT MAP(Sinal(0), DataR1, DataR2, ProdutoAux);
-
-PROCESS(Clear)
-	BEGIN	
-			IF Clear = '1' THEN
-				Produto <= "00000000";
+	
+	PROCESS(Clear, Sinal)
+		BEGIN
+		IF Clear = '1' THEN
+			Produto <= "00000000";
+		ELSE
+			IF Sinal(1) = '1' THEN
+			Produto <= ProdutoAux;
 			ELSE
-				IF Sinal(1) = '1' THEN
-				Produto <= ProdutoAux;
-				ELSE
-				Produto <= DataR2;
-				END IF;
+			Produto <= DataR2;
 			END IF;
+		END IF;
 	END PROCESS;
+
 END behavior;

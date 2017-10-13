@@ -19,6 +19,7 @@ BEGIN
 	PROCESS (Clock,Clear)
 	BEGIN
 		IF Clear = '1' then
+			state <= s0;
 	ELSIF (Clock'EVENT AND Clock = '1') THEn
 		CASE 	state IS
 			WHEN s0=>
