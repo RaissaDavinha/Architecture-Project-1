@@ -13,12 +13,6 @@ END Multiplex_2p1_2bits;
 ARCHITECTURE behavior OF Multiplex_2p1_2bits IS
 
 BEGIN
-	PROCESS(Sinal)
-		BEGIN
-		IF Sinal = '1' THEN
-			X <= A;
-		ELSE
-			X <= B;
-		END IF;
-	END PROCESS;
+	X <= A WHEN (Sinal = '1') ELSE B;
+
 END behavior;
