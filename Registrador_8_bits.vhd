@@ -12,12 +12,12 @@ END Registrador_8_bits;
 ARCHITECTURE description OF Registrador_8_bits IS
 
 BEGIN
-    process(Clock, Clear)
-    begin
-        if Clear = '1' then
+    PROCESS(Clock, Clear)
+    BEGIN
+        IF Clear = '1' THEN
             Q <= "00000000";
-        elsif rising_edge(Clock) AND RegWrite = '1' then
+        ELSIF rising_edge(Clock) AND RegWrite = '1' THEN
                 Q <= D;
-        end if;
-    end process;
+        END IF;
+    END PROCESS;
 END description;

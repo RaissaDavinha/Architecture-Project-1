@@ -15,7 +15,7 @@ END CPU;
 ARCHITECTURE behavior OF CPU IS
 --==================================================================================================
 
-component Banco_Registradores IS PORT(
+COMPONENT Banco_Registradores IS PORT(
    Reg1  		: IN STD_LOGIC_VECTOR(1 DOWNTO 0);
 	Reg2   		: IN STD_LOGIC_VECTOR(1 DOWNTO 0);
 	Data	  		: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
@@ -29,9 +29,9 @@ component Banco_Registradores IS PORT(
 	Reg_2  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
 	Reg_3	: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
 	);
-END component;
+END COMPONENT;
 
-component ControlUnit IS PORT (
+COMPONENT ControlUnit IS PORT (
 	Clear			: IN	  	STD_LOGIC;
 	Clock			: IN 	  	STD_LOGIC;
 	OP 			: IN    	STD_LOGIC_VECTOR(3 DOWNTO 0) ;
@@ -39,40 +39,41 @@ component ControlUnit IS PORT (
 	XCHG			: OUT		STD_LOGIC;
 	RegWrite		: OUT		STD_LOGIC
 	);
-END component;
+END COMPONENT;
 
-component ULA IS PORT(
+COMPONENT ULA IS PORT(
 	Sinal		: IN STD_LOGIC_VECTOR(1 DOWNTO 0);
 	Clear		: IN STD_LOGIC;
    DataR1  	: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
 	DataR2   : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
 	Produto	: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
 	);	
-END component;
+END COMPONENT;
 
-component Registrador_8_bits IS PORT(
+COMPONENT Registrador_8_bits IS PORT(
    D   		: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
    RegWrite: IN STD_LOGIC; -- load/enable.
    Clear 	: IN STD_LOGIC; -- async. clear.
    Clock 	: IN STD_LOGIC; -- clock.
    Q   		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
 	);
-END component;
+END COMPONENT;
 
-component Multiplex_2p1_8bits IS PORT(
+COMPONENT Multiplex_2p1_8bits IS PORT(
 	A	: IN	STD_LOGIC_VECTOR(7 DOWNTO 0);
 	B	: IN	STD_LOGIC_VECTOR(7 DOWNTO 0);
 	Sinal	: IN STD_LOGIC;
 	X	: OUT	STD_LOGIC_VECTOR(7 DOWNTO 0)
 	);
-END component;
-component Multiplex_2p1_2bits IS PORT(
+END COMPONENT;
+
+COMPONENT Multiplex_2p1_2bits IS PORT(
 	A	: IN	STD_LOGIC_VECTOR(1 DOWNTO 0);
 	B	: IN	STD_LOGIC_VECTOR(1 DOWNTO 0);
 	Sinal	: IN STD_LOGIC;
 	X	: OUT	STD_LOGIC_VECTOR(1 DOWNTO 0)
 	);
-END component;
+END COMPONENT;
 --==================================================================================================
 
 SIGNAL		Entrada_RA 	: STD_LOGIC_VECTOR(1 DOWNTO 0);

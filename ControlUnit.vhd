@@ -17,8 +17,8 @@ ARCHITECTURE Behavior OF ControlUnit IS
 BEGIN
 	PROCESS (Clock,Clear)
 	BEGIN
-		IF Clear = '1' then
-	ELSIF (Clock'EVENT AND Clock = '1') THEn
+		IF Clear = '1' THEN
+	ELSIF (Clock'EVENT AND Clock = '1') THEN
 		CASE 	state IS
 			WHEN s0=>
 				state <= s1;
